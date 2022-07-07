@@ -11,6 +11,7 @@ const UserSchema = new mongoose.Schema({
     phone:{ type: Number, required: true, unique: true },
     weight:{ type: Number },
     height:{ type: Number },
+    profilePhoto:{ type: String },
     isVerify:{ type: Boolean, required: true },
 }, { timestamps: true });
 

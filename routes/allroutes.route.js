@@ -3,6 +3,8 @@ const router = express.Router();
 const jwtAuth = require("../middelware/jwtAuth");
 const authController = require("../controllers/auth.controller")
 const userController = require("../controllers/user.controller")
+const notificationController = require("../controllers/notification.controller");
+const bannerController = require("../controllers/banner.controller");
 
 // Auth Routes
 router.post("/auth/signup", authController.signup);
@@ -17,8 +19,19 @@ router.patch("/auth/changepassword/:userid", jwtAuth.verifyToken, authController
 
 // Users Routes
 router.patch("/user/updateprofile/:userid", jwtAuth.verifyToken, userController.updateProfile);
+router.patch("/user/updateprofilephoto/:userid", jwtAuth.verifyToken, userController.updateProfilePhoto);
 router.patch("/user/updategenheiwei/:userid", jwtAuth.verifyToken, userController.updateProfileGenderHeightWeight);
 router.patch("/user/updategenheiweibyemail/:email", jwtAuth.verifyToken, userController.updateProfileGenderHeightWeightByEmail);
+
+// Notification Routes
+router.post("/user/createnotification", notificationController.createNotification);
+router.get("/user/getusersnotification/:userid", notificationController.getNotificationByUser);
+
+// Banner Controller
+router.get("/banner",jwtAuth.verifyToken,jwtAuth.isAdmin,bannerController.getAllBanner);
+router.get("/banner/:id",jwtAuth.verifyToken,jwtAuth.isAdmin,bannerController.getSingleBanner);    
+router.post("/banner",jwtAuth.verifyToken,jwtAuth.isAdmin,bannerController.createBanner);
+router.put("/banner/:id",jwtAuth.verifyToken,jwtAuth.isAdmin,bannerController.updateBanner);
 
 
 module.exports = router;

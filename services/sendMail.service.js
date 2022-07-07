@@ -16,9 +16,9 @@ const sendmail = (email, subject, text) => {
     };
 
     transport.sendMail(mailOptions).then(() => {
-        console.log("Mail Send Successfully");
+        return { success: "success", message: "Mail Send Sussfully" };
     }).catch((err) => {
-        console.log(err);
+        return { success: "error", message: err };
     })
 };
 

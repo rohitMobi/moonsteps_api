@@ -8,9 +8,9 @@ const jwt = require("jsonwebtoken");
 
 exports.updateProfile = (req, res) => {
     const userid = req.params.userid;
-    const { firstName, lastName, bio, gender, email, weight, height } = req.body;
+    const { firstName, lastName, bio, gender, email, weight, height, profilePhoto } = req.body;
     try {
-        if(firstName && lastName && bio && gender && email && weight && height){
+        if(firstName && lastName && bio && gender && email && weight && height && profilePhoto){
             if(!/^([A-Z|a-z|0-9](\.|_){0,1})+[A-Z|a-z|0-9]\@([A-Z|a-z|0-9])+((\.){0,1}[A-Z|a-z|0-9]){2}\.[a-z]{2,3}$/.test(email)){
                 res.status(500).send({ status: "error", message: "Email not valid" });
                 return;
@@ -19,18 +19,21 @@ exports.updateProfile = (req, res) => {
                 return;
             }
 
-            User.findOne({ _id: userid, email: email }).then((data) => {
-                console.log(data)
-                User.findByIdAndUpdate(userid, { $set: { firstName: firstName, lastName : lastName, bio: bio, gender: gender, email: email, weight: weight, height: height } }).then(() => {
-                    res.status(200).send({ status: "success", message: "User Update Successfully." });
-                }).catch((err) => {
-                    res.status(500).send({ status: "error", message: err });
-                });
+            User.findOne({ _id: userid }).then((data) => {
+                if(data !== null){
+                    User.findByIdAndUpdate(userid, { $set: { firstName: firstName, lastName : lastName,bio: bio, gender: gender, email: email, weight: weight, height: height, profilePhoto: profilePhoto } }).then(() => {
+                        res.status(200).send({ status: "success", message: "User Update Successfully." });
+                    }).catch((err) => {
+                        res.status(500).send({ status: "error", message: err });
+                    });
+                }else{
+                    res.status(500).send({ status: "error", message: "User Not Found" });
+                }
             }).catch(() => {
                 res.status(500).send({ status: "error", message: "User Not Found" });
             })
         }else{
-            res.status(500).send({ status: "error", message: "User Id or firstName, lastName, bio, gender, email, weight, height not found." });
+            res.status(500).send({ status: "error", message: "User Id or first name, last name, bio, gender, email, weight, height, profile photo not found." });
             return;
         }
     } catch (error) {
@@ -38,7 +41,33 @@ exports.updateProfile = (req, res) => {
     }
 }
 
-
+exports.updateProfilePhoto = (req, res) => {
+    const userid = req.params.userid;
+    const { profilePhoto } = req.body;
+    try {
+        if(profilePhoto){
+            console.log("User Id: " + userid);
+            User.findOne({ _id: userid }).then((data) => {
+                if(data !== null){
+                    User.findByIdAndUpdate(userid, { $set: { profilePhoto: profilePhoto } }).then(() => {
+                        res.status(200).send({ status: "success", message: "User Update Successfully." });
+                    }).catch((err) => {
+                        res.status(500).send({ status: "error", message: err });
+                    });   
+                }else{
+                    res.status(500).send({ status: "error", message: "User Not Found" });
+                }
+            }).catch((err) => {
+                res.status(500).send({ status: "error", message: "User Not Found" });
+            })
+        }else{
+            res.status(500).send({ status: "error", message: "User Id or Profile Photo not found." });
+            return;
+        }
+    } catch (error) {
+        res.status(500).send({ status: "error", message: error });
+    }
+}
 
 exports.updateProfileGenderHeightWeight = (req, res) => {
     const userid = req.params.userid;
@@ -50,11 +79,19 @@ exports.updateProfileGenderHeightWeight = (req, res) => {
                 return;
             }
 
-            User.findByIdAndUpdate(userid, { $set: { gender: gender, weight: weight, height: height } }).then(() => {
-                res.status(200).send({ status: "success", message: "User Update Gender, Weight, Height Successfully." });
-            }).catch(() => {
+            User.findOne({ _id: userid }).then((data) => {
+                if(data !== null){
+                    User.findByIdAndUpdate(userid, { $set: { gender: gender, weight: weight, height: height } }).then(() => {
+                        res.status(200).send({ status: "success", message: "User Update Gender, Weight, Height Successfully." });
+                    }).catch(() => {
+                        res.status(500).send({ status: "error", message: "User Not Found" });
+                    })
+                }else{
+                    res.status(500).send({ status: "error", message: "User Not Found" });
+                }
+            }).catch((err) => {
                 res.status(500).send({ status: "error", message: "User Not Found" });
-            })
+            });
         }else{
             res.status(500).send({ status: "error", message: "User Id or gender, weight, height not found." });
             return;
@@ -63,7 +100,6 @@ exports.updateProfileGenderHeightWeight = (req, res) => {
         res.status(500).send({ status: "error", message: error });
     }
 }
-
 
 exports.updateProfileGenderHeightWeightByEmail = (req, res) => {
     const email = req.params.email;
@@ -79,12 +115,18 @@ exports.updateProfileGenderHeightWeightByEmail = (req, res) => {
             }
 
             User.findOne({ email : email }).then((data) => {
-                User.findByIdAndUpdate(data._id, { $set: { gender: gender, weight: weight, height: height } }).then(() => {
-                    res.status(200).send({ status: "success", message: "User Update Gender, Weight, Height Successfully." });
-                })
-            }).catch(() => {
+                if(data !== null){
+                    User.findByIdAndUpdate(data._id, { $set: { gender: gender, weight: weight, height: height } }).then(() => {
+                        res.status(200).send({ status: "success", message: "User Update Gender, Weight, Height Successfully." });
+                    }).catch(() => {
+                        res.status(500).send({ status: "error", message: "User Not Found" });
+                    })
+                }else{
+                    res.status(500).send({ status: "error", message: "User Not Found" });
+                }
+            }).catch((err) => {
                 res.status(500).send({ status: "error", message: "User Not Found" });
-            })
+            });
         }else{
             res.status(500).send({ status: "error", message: "User Id or gender, weight, height not found." });
             return;

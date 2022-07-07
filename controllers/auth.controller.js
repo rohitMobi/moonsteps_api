@@ -24,7 +24,7 @@ exports.signup = (req, res) => {
                 return;
             }
 
-            const newUser = new User({ firstName: "", lastName: "", bio: "", gender: "", email: email, password: bcryptjs.hashSync(password, 8), phone: phone, role: role, isVerify: false, weight: 0, height: 0 });
+            const newUser = new User({ firstName: "", lastName: "", bio: "", gender: "", email: email, profilePhoto: "", password: bcryptjs.hashSync(password, 8), phone: phone, role: role, isVerify: false, weight: 0, height: 0 });
             newUser.save().then((data) => {
                 const OTP = generateOtp();
                 const htmlContent = `
@@ -45,7 +45,7 @@ exports.signup = (req, res) => {
                 res.status(500).send({ status: "error", message: "Your Email Or Mobile Number is already register.", err: error });
             });
         } else {
-            res.status(500).send({ status: "error", message: "All Fields are required. Fields is email, password, confirm password, mobile" });
+            res.status(500).send({ status: "error", message: "All Fields are required. Fields is email, password, confirm password, phone" });
         }
     } catch (error) {
         res.status(500).send({ status: "error", message: error });
@@ -334,49 +334,6 @@ exports.changePassword = (req, res) => {
         }).catch((error) => {
             res.status(500).send({ status: "error", message: "User Not Found" });
         });
-
-        // User.findOne({ _id: userid, email: email }, (err, userdata) => {
-        //     if (err) {
-        //         res.status(500).send({ status: "error", message: err });
-        //     }
-
-        //     if (!userdata) {
-        //         res.status(500).send({ status: "error", message: "User Not Found." });
-        //         return;
-        //     }
-
-        //     Otp.findOne({ userId: userid, otp: otp }, (err, otpdata) => {
-        //         if (err) {
-        //             res.status(500).send({ status: "error", message: err });
-        //         }
-
-        //         if (!otpdata) {
-        //             res.status(500).send({ status: "error", message: "OTP Expired" });
-        //             return;
-        //         }
-
-        //         User.findByIdAndUpdate(userid, { $set: { isVerify: true } }, (err, data) => {
-        //             if (err) {
-        //                 res.status(500).send({ status: "error", message: err });
-        //             }
-
-        //             Otp.findByIdAndDelete(otpdata._id, (err, data) => {
-        //                 if (err) {
-        //                     res.status(500).send({ status: "error", message: err });
-        //                 }
-
-        //                 User.findByIdAndUpdate(userid, { $set: { password: bcryptjs.hashSync(new_password, 8) } }, (err, data) => {
-        //                     if (err) {
-        //                         res.status(500).send({ status: "error", message: err });
-        //                     }
-
-        //                     res.status(200).send({ status: "success", message: "Password Update Successfully." });
-        //                 })
-
-        //             })
-        //         });
-        //     })
-        // });
     } catch (error) {
         res.status(500).send({ status: "error", message: error });
     }
