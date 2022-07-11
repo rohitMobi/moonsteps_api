@@ -69,6 +69,35 @@ exports.updateProfilePhoto = (req, res) => {
     }
 }
 
+
+exports.updateGeolocation = (req, res) => {
+    const userid = req.params.userid;
+    const { lat, long } = req.body;
+    try {
+        if(lat && long){
+            console.log("User Id: " + userid);
+            User.findOne({ _id: userid }).then((data) => {
+                if(data !== null){
+                    User.findByIdAndUpdate(userid, { $set: { profilePhoto: profilePhoto } }).then(() => {
+                        res.status(200).send({ status: "success", message: "User Update Successfully." });
+                    }).catch((err) => {
+                        res.status(500).send({ status: "error", message: err });
+                    });   
+                }else{
+                    res.status(500).send({ status: "error", message: "User Not Found" });
+                }
+            }).catch((err) => {
+                res.status(500).send({ status: "error", message: "User Not Found" });
+            })
+        }else{
+            res.status(500).send({ status: "error", message: "User Id or Latitude, Longitude not found." });
+            return;
+        }
+    } catch (error) {
+        res.status(500).send({ status: "error", message: error });
+    }
+}
+
 exports.updateProfileGenderHeightWeight = (req, res) => {
     const userid = req.params.userid;
     const { gender, weight, height } = req.body;

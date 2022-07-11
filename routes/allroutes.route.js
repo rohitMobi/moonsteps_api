@@ -1,10 +1,15 @@
 const express = require("express");
 const router = express.Router();
+const upload = require("../services/multer.service");
 const jwtAuth = require("../middelware/jwtAuth");
 const authController = require("../controllers/auth.controller")
 const userController = require("../controllers/user.controller")
 const notificationController = require("../controllers/notification.controller");
 const bannerController = require("../controllers/banner.controller");
+const fileController = require("../controllers/file.controller");
+
+// Files Routes
+router.post("/file/upload", upload.single("image"), fileController.uploadImage);
 
 // Auth Routes
 router.post("/auth/signup", authController.signup);
@@ -22,6 +27,7 @@ router.patch("/user/updateprofile/:userid", jwtAuth.verifyToken, userController.
 router.patch("/user/updateprofilephoto/:userid", jwtAuth.verifyToken, userController.updateProfilePhoto);
 router.patch("/user/updategenheiwei/:userid", jwtAuth.verifyToken, userController.updateProfileGenderHeightWeight);
 router.patch("/user/updategenheiweibyemail/:email", jwtAuth.verifyToken, userController.updateProfileGenderHeightWeightByEmail);
+router.patch("/user/updategeolocation/:userid", jwtAuth.verifyToken, userController.updateGeolocation);
 
 // Notification Routes
 router.post("/user/createnotification", notificationController.createNotification);

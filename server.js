@@ -7,7 +7,7 @@ const allroutes = require("./routes/allroutes.route");
 const app = express();
 app.use(express.json());
 
-mongoose.connect("mongodb://localhost:27017/moonsteps").then(() => {
+mongoose.connect(process.env.DB_URL).then(() => {
     console.log("Database Connected");
 });
 

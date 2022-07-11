@@ -13,6 +13,8 @@ const UserSchema = new mongoose.Schema({
     height:{ type: Number },
     profilePhoto:{ type: String },
     isVerify:{ type: Boolean, required: true },
+    lat: { type: Number },
+    long: { type: Number }
 }, { timestamps: true });
 
 module.exports = mongoose.model("users", UserSchema);

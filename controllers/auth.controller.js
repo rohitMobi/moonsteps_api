@@ -5,7 +5,7 @@ const sendmail = require("../services/sendMail.service");
 const generateOtp = require("../services/otp.service");
 const jwt = require("jsonwebtoken");
 
-exports.signup = (req, res) => {
+exports.signup = async(req, res) => {
     const { email, password, confirm_password, phone, role } = req.body;
 
     try {
@@ -24,8 +24,21 @@ exports.signup = (req, res) => {
                 return;
             }
 
-            const newUser = new User({ firstName: "", lastName: "", bio: "", gender: "", email: email, profilePhoto: "", password: bcryptjs.hashSync(password, 8), phone: phone, role: role, isVerify: false, weight: 0, height: 0 });
-            newUser.save().then((data) => {
+            const isEmail = await User.findOne({ email: email });
+            const isMobile = await User.findOne({ phone: phone });
+            if(isEmail && isMobile){
+                res.status(500).send({ status: "error", message: "Email & Phone Number is already exits." });
+                return;
+            }else if(isEmail){
+                res.status(500).send({ status: "error", message: "Email is already exits." });
+                return;
+            }else if(isMobile){
+                res.status(500).send({ status: "error", message: "Mobile Phone is already exits." });
+                return;
+            }
+
+            const newUser = new User({ firstName: "", lastName: "", bio: "", gender: "", email: email, profilePhoto: "", password: bcryptjs.hashSync(password, 8), phone: phone, role: role, isVerify: false, weight: 0, height: 0, lat: 0, long: 0 });
+            newUser.save().then(async (data) => {
                 const OTP = generateOtp();
                 const htmlContent = `
                     <div class="container" style="max-width: 90%; margin: auto; padding-top: 20px">
@@ -34,7 +47,7 @@ exports.signup = (req, res) => {
                             <p style="margin-bottom: 30px;">Pleas enter the sign up OTP to get started</p>
                             <h1 style="font-size: 40px; letter-spacing: 2px; text-align:center;">${OTP}</h1>
                     </div>`;
-                sendmail(email, "Registed SuccessFully", htmlContent);
+                var sendMailStatus = await sendmail(email, "Registed SuccessFully", htmlContent);
                 const newOTP = new Otp({ otp: OTP, userId: data._id });
                 newOTP.save().then(() => {
                     res.status(200).send({ status: "success", message: "Successfully User Register" });
@@ -52,7 +65,7 @@ exports.signup = (req, res) => {
     }
 }
 
-exports.signin = (req, res) => {
+exports.signin = async(req, res) => {
     const { email, password } = req.body;
     try {
         if (!/^([A-Z|a-z|0-9](\.|_){0,1})+[A-Z|a-z|0-9]\@([A-Z|a-z|0-9])+((\.){0,1}[A-Z|a-z|0-9]){2}\.[a-z]{2,3}$/.test(email)) {
@@ -62,16 +75,18 @@ exports.signin = (req, res) => {
             res.status(500).send({ status: "error", message: "Password not valid" });
             return;
         }
-        User.find({ email: email }).then((data) => {
-            if (bcryptjs.compareSync(password, data[0].password)) {
-                const token = jwt.sign({ id: data[0]._id }, "Moonsteps", { expiresIn: "1h" });
-                res.status(200).send({ status: "success", message: "Successfully User Login", token: token, userId: data[0]._id, email: email });
+        
+        var user = await User.findOne({ email: email })
+        if(user){
+            if (bcryptjs.compareSync(password, user.password)) {
+                const token = jwt.sign({ id: user._id }, "Moonsteps", { expiresIn: "1h" });
+                res.status(200).send({ status: "success", message: "Successfully User Login", token: token, userId: user._id, email: email });
             } else {
                 res.status(500).send({ status: "error", message: "Password Not Matched." });
             }
-        }).catch((err) => {
-            res.status(500).send({ status: "error", message: "User Not Found" });
-        })
+        }else{
+            res.status(500).send({ status: "error", message: "User not found." });
+        }
     } catch (error) {
         res.status(500).send({ status: "error", message: error });
     }
