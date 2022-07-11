@@ -7,6 +7,11 @@ const userController = require("../controllers/user.controller")
 const notificationController = require("../controllers/notification.controller");
 const bannerController = require("../controllers/banner.controller");
 const fileController = require("../controllers/file.controller");
+const qrController = require("../controllers/qr.controller");
+
+// QR Routes
+router.get("/qr/generator", qrController.qrgenerator);
+router.post("/qr/scan", qrController.qrscanner);
 
 // Files Routes
 router.post("/file/upload", upload.single("image"), fileController.uploadImage);
